@@ -1,0 +1,40 @@
+# Byte-compiled / cached
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Packaging and build artifacts
+build/
+dist/
+*.egg-info/
+
+# Test, lint and type caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# The FAISS index and anything else written at runtime
+backend/data/*.faiss
+backend/data/*.faiss.tmp
+
+# Secrets and local configuration
+.env
+!.env.example
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# Node / web
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo

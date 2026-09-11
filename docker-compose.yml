@@ -1,0 +1,107 @@
+# Four services and one job: MongoDB, the model host, the API, the web app.
+#
+# There is no authentication, no TLS and no secret anywhere in this file. CORS
+# is open. That is deliberate for a local single-user tool and it is stated in
+# the README under "Not included" — do not point this at a network you do not
+# own.
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # Opt-in, via `--profile bundled`. Docker Desktop on macOS runs a Linux VM
+  # with no Metal passthrough, so ollama in a container on a Mac is CPU-only
+  # however much GPU the machine has. Use this profile on Linux, in CI, or
+  # anywhere there is no ollama on the host.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["bundled"]
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # A one-shot job, not a service: it pulls the models into the shared volume
+  # and exits, so the first question never races a half-downloaded model.
+  ollama-pull:
+    image: ollama/ollama:latest
+    profiles: ["bundled"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      CHAT_MODEL: ${CHAT_MODEL:-qwen3:1.7b}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'ollama pull "$${EMBED_MODEL}" && ollama pull "$${CHAT_MODEL}"'
+    restart: "no"
+
+  api:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    # Only mongo, deliberately. `api` must come up whether or not a model host
+    # is answering: on a cold `--profile bundled` start, ollama is pulling
+    # gigabytes, and /health answers 200 with status "starting" throughout so
+    # this container goes healthy and `web` — which waits on it — actually
+    # starts. /chat still refuses with a 503 until the model is there.
+    depends_on:
+      mongo:
+        condition: service_healthy
+    # host.docker.internal reaches the ollama already running on your machine,
+    # which has the GPU. Point OLLAMA_HOST at http://ollama:11434 (and add
+    # `--profile bundled`) to use the containerised, CPU-only one instead.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - faiss-index:/data
+    environment:
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      MONGO_URI: mongodb://mongo:27017
+      CHAT_MODEL: ${CHAT_MODEL:-qwen3:1.7b}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      # Generous: a cold model load is slow, and a timeout here surfaces as a
+      # 503 that looks like a bug rather than as a cold start.
+      OLLAMA_TIMEOUT: "600"
+      # TOP_K and MIN_SCORE are deliberately absent: unset means "the app's
+      # default", which lives beside the measurement that justifies it in
+      # retrieve.py. Pinning them here was a fourth copy of each number, free
+      # to drift from the documented one. Set them in the environment to
+      # override.
+      # OFFLINE=true serves the deterministic fakes and an in-memory store, so
+      # the whole stack comes up with no model and no database at all. It is
+      # reported by /health, never silent.
+      OFFLINE: ${OFFLINE:-false}
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
+  ollama-models:
+  faiss-index:

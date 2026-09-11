@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #ffffff;
+  --color-panel: #f6f7f9;
+  --color-line: #e4e6eb;
+  --color-ink: #14161a;
+  --color-muted: #6b7280;
+  --color-accent: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-surface: #0f1115;
+    --color-panel: #161a21;
+    --color-line: #262b34;
+    --color-ink: #e8eaed;
+    --color-muted: #9aa1ad;
+    --color-accent: #60a5fa;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}

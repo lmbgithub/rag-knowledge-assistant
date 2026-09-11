@@ -1,0 +1,16 @@
+# NVIDIA passthrough for the bundled ollama.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml \
+#     --profile bundled up
+#
+# There is no macOS equivalent: Docker Desktop's Linux VM has no Metal
+# passthrough, so on a Mac the host's ollama is the only way to reach the GPU.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]

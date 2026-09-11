@@ -1,0 +1,55 @@
+# Every hook here also runs in CI. The hooks are the fast half of that: they
+# catch what is cheap to catch locally, and CI stays the authority.
+#
+#   pip install pre-commit && pre-commit install
+#   pre-commit run --all-files
+default_install_hook_types: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=512"]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.1
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  # Local, not a mirror repo: these run against the versions in
+  # frontend/package.json, so the hook cannot pass with a formatter that
+  # disagrees with the one CI uses.
+  - repo: local
+    hooks:
+      # Invoked from the repository root, because that is the directory the
+      # paths pre-commit passes are relative to. Running it from `frontend/`
+      # was the first version and every path missed.
+      - id: prettier
+        name: prettier
+        language: system
+        entry: frontend/node_modules/.bin/prettier --write
+        files: ^frontend/.*\.(ts|tsx|js|mjs|json|css|md)$
+        exclude: ^frontend/(node_modules|\.next)/
+
+      # Needs the backend's dependencies in the environment pre-commit runs
+      # in: `pip install -e "backend[dev]"`. It is here rather than only in CI
+      # because the suite takes about ten seconds and catches the pipeline
+      # regressions that no formatter can.
+      - id: pytest
+        name: pytest (backend)
+        language: system
+        entry: bash -c 'cd backend && python -m pytest -q'
+        pass_filenames: false
+        files: ^backend/

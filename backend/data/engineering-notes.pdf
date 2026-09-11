@@ -1,0 +1,88 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 298 >>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+14 TL
+(The migration from MySQL to PostgreSQL completed in March 2026 after) Tj
+T*
+(two false starts. The cutover took forty minutes and no rows were) Tj
+T*
+(lost. Replication lag peaked at eleven seconds during the switch. The) Tj
+T*
+(rollback plan was never used.) Tj
+T*
+ET
+endstream
+endobj
+3 0 obj
+<< /Length 274 >>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+14 TL
+(Caching is served by Redis with a sixty second time to live. Cache) Tj
+T*
+(hits account for roughly eighty percent of read traffic at peak. The) Tj
+T*
+(eviction policy is allkeys-lru and the working set fits in four) Tj
+T*
+(gigabytes.) Tj
+T*
+ET
+endstream
+endobj
+4 0 obj
+<< /Length 242 >>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+14 TL
+(Deployment runs on three Kubernetes replicas behind an nginx ingress.) Tj
+T*
+(Rolling updates take about ninety seconds. The readiness probe checks) Tj
+T*
+(the database connection, not just the process.) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 8 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+8 0 obj
+<< /Type /Pages /Count 3 /Kids [5 0 R 6 0 R 7 0 R] >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000428 00000 n 
+0000000753 00000 n 
+0000001046 00000 n 
+0000001172 00000 n 
+0000001298 00000 n 
+0000001424 00000 n 
+0000001493 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R >>
+startxref
+1542
+%%EOF
