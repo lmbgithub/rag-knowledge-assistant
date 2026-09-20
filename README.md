@@ -1,9 +1,13 @@
 # rag-knowledge-assistant
 
-Upload one PDF, wait for it to be indexed, then ask questions about it — with
-the passages each answer came from shown underneath it. A **local chat model
-under 2B parameters**, a FAISS index on disk, MongoDB for the document record
-and the conversation history. No login, no accounts, no API key.
+Upload one PDF, wait for it to be indexed, then ask questions about it, with
+the passages each answer came from shown underneath it. It runs on a **local
+chat model under 2B parameters**, a FAISS index on disk, and MongoDB for the
+document record and the conversation history. No login, no accounts, no API key.
+
+The intention is a complete, self-hosted RAG application: small enough to run on
+a laptop, and built so every answer can be traced back to the text it came
+from.
 
 FastAPI, LlamaIndex, FAISS, pypdf and pymongo on the backend; Next.js 15,
 Tailwind v4 and hand-rolled shadcn-style components on the front. Inference
